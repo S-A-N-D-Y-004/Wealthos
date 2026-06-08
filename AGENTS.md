@@ -2,26 +2,31 @@
 
 ## Product Vision
 
-WealthOS is a personal wealth operating system.
+WealthOS is a personal wealth operating system designed for lifetime use.
 
-Its purpose is to help users understand, grow, and manage their wealth over decades.
+The platform exists to help users understand, manage, and grow their wealth over decades.
 
-The platform focuses on:
+WealthOS focuses on:
 
 * Net Worth
 * Asset Allocation
 * Retirement Planning
 * Goal Tracking
+* Financial Health
 * Wealth Analytics
-* Financial Discipline
+* Investment Discipline
 
-The platform does NOT provide direct buy or sell recommendations.
+WealthOS is NOT:
+
+* A trading platform
+* A stock screener
+* A buy/sell recommendation engine
 
 ---
 
-## Source of Truth
+## Core Principle
 
-Transaction Ledger is the source of truth.
+The Transaction Ledger is the source of truth.
 
 Data flow:
 
@@ -30,17 +35,64 @@ Transactions
 → Portfolio
 → Net Worth
 
-Never bypass the transaction ledger.
+Never bypass the ledger.
+
+Never directly modify holdings if they can be derived from transactions.
+
+---
+
+## Financial Rules
+
+All financial calculations must be deterministic.
+
+Avoid floating-point calculations for money.
+
+Store monetary values in minor units where possible.
+
+Financial calculations must be testable.
+
+---
+
+## Architecture Principles
+
+Frontend:
+
+* Next.js
+* TypeScript
+* Tailwind
+* shadcn/ui
+
+Backend:
+
+* Next.js API Routes
+
+Database:
+
+* PostgreSQL
+
+ORM:
+
+* Prisma
+
+Authentication:
+
+* Auth.js
+
+Jobs:
+
+* Trigger.dev
 
 ---
 
 ## Development Priorities
 
 1. Data Integrity
-2. Correct Calculations
+2. Correct Financial Calculations
 3. Test Coverage
 4. Maintainability
 5. User Experience
+
+Never sacrifice data integrity for UI convenience.
 
 ---
 
@@ -61,3 +113,28 @@ Phase 2B
 Phase 2C
 
 * CSV Import Expansion
+
+Future
+
+* Broker Integrations
+* Live Market Data
+* Wealth Reports
+* AI Insights Expansion
+
+---
+
+## AI Restrictions
+
+Never provide:
+
+* Buy recommendations
+* Sell recommendations
+* Target prices
+
+AI should only provide:
+
+* Analysis
+* Education
+* Observations
+* Risk awareness
+* Planning assistance
