@@ -1,0 +1,504 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountProvider {
+  ANGEL_ONE
+  COINDCX
+  ZERODHA_KITE
+  PAYTM_MONEY
+  PHONEPE
+  ICICI_PRUDENTIAL
+  MANUAL
+  OTHER
+}
+
+enum AccountType {
+  BROKERAGE
+  MUTUAL_FUND_PLATFORM
+  CRYPTO_EXCHANGE
+  GOLD_PROVIDER
+  BANK
+  INSURANCE
+  RETIREMENT
+  MANUAL
+}
+
+enum AssetType {
+  STOCK
+  ETF
+  MUTUAL_FUND
+  CRYPTO
+  GOLD
+  CASH
+  FIXED_DEPOSIT
+  BOND
+  REAL_ESTATE
+  OTHER
+}
+
+enum AssetCategoryKind {
+  EQUITY
+  DEBT
+  CASH
+  GOLD
+  CRYPTO
+  REAL_ESTATE
+  ALTERNATIVE
+  INSURANCE
+  OTHER
+}
+
+enum TransactionType {
+  BUY
+  SELL
+  DIVIDEND
+  INTEREST
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER_IN
+  TRANSFER_OUT
+  FEE
+  TAX
+  SPLIT
+  BONUS
+  ADJUSTMENT
+}
+
+enum GoalType {
+  EMERGENCY_FUND
+  HOUSE
+  VEHICLE
+  RETIREMENT
+  EDUCATION
+  CUSTOM
+}
+
+enum GoalPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum LiabilityType {
+  HOME_LOAN
+  VEHICLE_LOAN
+  PERSONAL_LOAN
+  EDUCATION_LOAN
+  CREDIT_CARD
+  EMI
+  OTHER
+}
+
+enum ImportSource {
+  ANGEL_ONE
+  COINDCX
+  ZERODHA_KITE
+  PAYTM_MONEY
+  PHONEPE
+  ICICI_PRUDENTIAL
+  MANUAL
+}
+
+enum ImportJobStatus {
+  UPLOADED
+  PREVIEWED
+  VALIDATING
+  VALIDATED
+  IMPORTING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AlertType {
+  GOAL
+  RETIREMENT
+  PORTFOLIO
+  IMPORT
+  SYSTEM
+}
+
+enum AlertChannel {
+  IN_APP
+  EMAIL
+  PUSH
+  TELEGRAM
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  DELETED
+  IMPORTED
+  CALCULATED
+  AUTHENTICATED
+  EXPORTED
+}
+
+enum AIInsightType {
+  NET_WORTH
+  GOAL
+  RETIREMENT
+  DIVERSIFICATION
+  RISK_CONCENTRATION
+  INVESTMENT_DISCIPLINE
+}
+
+model User {
+  id                  String               @id @default(cuid())
+  name                String?
+  email               String?              @unique
+  emailVerified       DateTime?
+  image               String?
+  role                String               @default("OWNER")
+  preferredCurrency   String               @default("INR")
+  accounts            Account[]
+  sessions            Session[]
+  authAccounts        AuthAccount[]
+  goals               Goal[]
+  liabilities         Liability[]
+  retirementProfiles  RetirementProfile[]
+  netWorthSnapshots   NetWorthSnapshot[]
+  importJobs          ImportJob[]
+  alerts              Alert[]
+  activityLogs        ActivityLog[]
+  aiInsights          AIInsight[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  deletedAt           DateTime?
+
+  @@index([email])
+}
+
+model AuthAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("auth_accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Account {
+  id               String          @id @default(cuid())
+  userId           String
+  name             String
+  provider         AccountProvider @default(MANUAL)
+  type             AccountType
+  baseCurrency     String          @default("INR")
+  externalId       String?
+  isActive         Boolean         @default(true)
+  syncEnabled      Boolean         @default(false)
+  lastSyncedAt     DateTime?
+  sourceMetadata   Json?
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  holdings         Holding[]
+  transactions     Transaction[]
+  importJobs       ImportJob[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+
+  @@index([userId, provider])
+  @@index([userId, type])
+}
+
+model AssetCategory {
+  id               String            @id @default(cuid())
+  name             String
+  kind             AssetCategoryKind
+  targetAllocation Decimal?          @db.Decimal(9, 4)
+  assets           Asset[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@unique([name])
+}
+
+model Asset {
+  id                 String         @id @default(cuid())
+  categoryId         String
+  symbol             String?
+  name               String
+  type               AssetType
+  isin               String?
+  exchange           String?
+  currency           String         @default("INR")
+  metadata           Json?
+  category           AssetCategory  @relation(fields: [categoryId], references: [id])
+  holdings           Holding[]
+  transactions       Transaction[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  deletedAt          DateTime?
+
+  @@index([type])
+  @@index([symbol])
+  @@index([isin])
+}
+
+model Holding {
+  id                    String       @id @default(cuid())
+  accountId             String
+  assetId               String
+  quantity              Decimal      @db.Decimal(24, 8)
+  averageCostMinor      BigInt
+  costBasisMinor        BigInt
+  currentPriceMinor     BigInt?
+  currentValueMinor     BigInt
+  realizedGainMinor     BigInt       @default(0)
+  unrealizedGainMinor   BigInt       @default(0)
+  valuationAsOf         DateTime?
+  sourceMetadata        Json?
+  account               Account      @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  asset                 Asset        @relation(fields: [assetId], references: [id])
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+  deletedAt             DateTime?
+
+  @@unique([accountId, assetId])
+  @@index([assetId])
+}
+
+model Transaction {
+  id                String          @id @default(cuid())
+  userId            String
+  accountId         String
+  assetId           String?
+  type              TransactionType
+  tradeDate         DateTime
+  settlementDate    DateTime?
+  quantity          Decimal?        @db.Decimal(24, 8)
+  priceMinor        BigInt?
+  amountMinor       BigInt
+  feesMinor         BigInt          @default(0)
+  taxesMinor        BigInt          @default(0)
+  currency          String          @default("INR")
+  externalReference String?
+  importJobId       String?
+  idempotencyKey    String?
+  notes             String?
+  metadata          Json?
+  account           Account         @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  asset             Asset?          @relation(fields: [assetId], references: [id])
+  importJob         ImportJob?      @relation(fields: [importJobId], references: [id])
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+
+  @@unique([userId, idempotencyKey])
+  @@index([accountId, tradeDate])
+  @@index([assetId])
+  @@index([importJobId])
+}
+
+model Goal {
+  id                    String             @id @default(cuid())
+  userId                String
+  name                  String
+  type                  GoalType
+  targetAmountMinor     BigInt
+  currentAmountMinor    BigInt             @default(0)
+  targetDate            DateTime
+  priority              GoalPriority        @default(MEDIUM)
+  monthlyFundingMinor   BigInt             @default(0)
+  expectedReturnRate    Decimal?           @db.Decimal(8, 6)
+  notes                 String?
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions         GoalContribution[]
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  deletedAt             DateTime?
+
+  @@index([userId, priority])
+  @@index([userId, targetDate])
+}
+
+model GoalContribution {
+  id              String   @id @default(cuid())
+  goalId          String
+  contributedAt   DateTime
+  amountMinor     BigInt
+  source          String?
+  notes           String?
+  goal            Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([goalId, contributedAt])
+}
+
+model Liability {
+  id                    String        @id @default(cuid())
+  userId                String
+  name                  String
+  type                  LiabilityType
+  principalMinor        BigInt
+  outstandingMinor      BigInt
+  interestRate          Decimal?      @db.Decimal(8, 6)
+  emiMinor              BigInt?
+  dueDate               DateTime?
+  lender                String?
+  currency              String        @default("INR")
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  deletedAt             DateTime?
+
+  @@index([userId, type])
+}
+
+model RetirementProfile {
+  id                         String   @id @default(cuid())
+  userId                     String
+  currentAge                 Int
+  retirementAge              Int
+  currentCorpusMinor         BigInt
+  monthlyContributionMinor   BigInt
+  monthlyExpenseMinor        BigInt
+  inflationRate              Decimal  @db.Decimal(8, 6)
+  expectedReturnRate         Decimal  @db.Decimal(8, 6)
+  safeWithdrawalRate         Decimal  @db.Decimal(8, 6)
+  user                       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt                  DateTime @default(now())
+  updatedAt                  DateTime @updatedAt
+  deletedAt                  DateTime?
+
+  @@index([userId])
+}
+
+model NetWorthSnapshot {
+  id                      String   @id @default(cuid())
+  userId                  String
+  snapshotDate            DateTime
+  totalAssetsMinor        BigInt
+  totalLiabilitiesMinor   BigInt
+  netWorthMinor           BigInt
+  holdingsDigest          Json?
+  liabilitiesDigest       Json?
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt               DateTime @default(now())
+
+  @@unique([userId, snapshotDate])
+  @@index([userId, snapshotDate])
+}
+
+model ImportJob {
+  id                 String          @id @default(cuid())
+  userId             String
+  accountId          String?
+  source             ImportSource
+  status             ImportJobStatus @default(UPLOADED)
+  originalFileName   String
+  storageKey         String?
+  detectedRows       Int             @default(0)
+  validRows          Int             @default(0)
+  duplicateRows      Int             @default(0)
+  rejectedRows       Int             @default(0)
+  mapping            Json?
+  validationSummary  Json?
+  startedAt          DateTime?
+  completedAt        DateTime?
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account            Account?        @relation(fields: [accountId], references: [id])
+  transactions       Transaction[]
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  @@index([userId, source, status])
+}
+
+model Alert {
+  id              String        @id @default(cuid())
+  userId          String
+  type            AlertType
+  channel         AlertChannel  @default(IN_APP)
+  severity        AlertSeverity @default(INFO)
+  title           String
+  message         String
+  readAt          DateTime?
+  scheduledFor    DateTime?
+  metadata        Json?
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId, type, readAt])
+}
+
+model ActivityLog {
+  id             String         @id @default(cuid())
+  userId         String
+  action         ActivityAction
+  entityType     String
+  entityId       String?
+  summary        String
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json?
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime       @default(now())
+
+  @@index([userId, createdAt])
+  @@index([entityType, entityId])
+}
+
+model AIInsight {
+  id              String        @id @default(cuid())
+  userId          String
+  type            AIInsightType
+  provider        String
+  model           String?
+  promptVersion   String
+  inputDigest     String
+  title           String
+  body            String
+  confidence      Decimal?      @db.Decimal(5, 4)
+  metadata        Json?
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId, type, createdAt])
+  @@unique([userId, type, inputDigest, promptVersion])
+}
+
