@@ -6,6 +6,22 @@ import {
 
 const asOf = new Date("2026-06-16T00:00:00.000Z");
 
+type TestAsset = {
+  id: string;
+  name: string;
+  symbol: string;
+  type: string;
+  category: {
+    kind: string;
+  };
+  priceSnapshots: Array<{
+    priceMinor: bigint;
+    currency: string;
+    asOf: Date;
+    fetchedAt: Date;
+  }>;
+};
+
 describe("ledger dashboard data", () => {
   it("returns a zero-state response for empty databases", async () => {
     const dashboard = await buildLedgerDashboardData({
@@ -195,6 +211,49 @@ describe("ledger dashboard data", () => {
     ]);
   });
 
+  it("uses latest price snapshots for valuation without changing derived cost basis", async () => {
+    const dashboard = await buildLedgerDashboardData({
+      userId: "user-1",
+      client: fakeDashboardClient({
+        accounts: [
+          account({
+            transactions: [
+              transaction({
+                id: "buy-equity",
+                asset: {
+                  ...equityAsset(),
+                  priceSnapshots: [
+                    {
+                      priceMinor: 30000n,
+                      currency: "INR",
+                      asOf: new Date("2026-06-16T00:00:00.000Z"),
+                      fetchedAt: new Date("2026-06-16T00:00:00.000Z")
+                    }
+                  ]
+                },
+                type: "BUY",
+                quantity: "10",
+                priceMinor: 10000n,
+                amountMinor: 100000n
+              })
+            ]
+          })
+        ]
+      }),
+      asOf
+    });
+
+    expect(dashboard.holdings[0]).toMatchObject({
+      quantity: 10,
+      averageCostMinor: 10000,
+      costBasisMinor: 100000,
+      currentPriceMinor: 30000,
+      currentValueMinor: 300000
+    });
+    expect(dashboard.netWorth.totalAssetsMinor).toBe(300000);
+    expect(dashboard.netWorth.holdings[0].gainLossMinor).toBe(200000);
+  });
+
   it("handles portfolios with no liabilities", async () => {
     const dashboard = await buildLedgerDashboardData({
       userId: "user-1",
@@ -326,7 +385,7 @@ function account(input: {
 function transaction(input: {
   id: string;
   accountId?: string;
-  asset: ReturnType<typeof equityAsset>;
+  asset: TestAsset;
   type: string;
   quantity: string;
   priceMinor: bigint;
@@ -349,7 +408,7 @@ function transaction(input: {
   };
 }
 
-function equityAsset() {
+function equityAsset(): TestAsset {
   return {
     id: "asset-equity",
     name: "Nippon India ETF Nifty BeES",
@@ -357,11 +416,12 @@ function equityAsset() {
     type: "ETF",
     category: {
       kind: "EQUITY"
-    }
+    },
+    priceSnapshots: []
   };
 }
 
-function goldAsset() {
+function goldAsset(): TestAsset {
   return {
     id: "asset-gold",
     name: "Digital Gold",
@@ -369,11 +429,12 @@ function goldAsset() {
     type: "GOLD",
     category: {
       kind: "GOLD"
-    }
+    },
+    priceSnapshots: []
   };
 }
 
-function cryptoAsset() {
+function cryptoAsset(): TestAsset {
   return {
     id: "asset-crypto",
     name: "Bitcoin",
@@ -381,6 +442,7 @@ function cryptoAsset() {
     type: "CRYPTO",
     category: {
       kind: "CRYPTO"
-    }
+    },
+    priceSnapshots: []
   };
 }

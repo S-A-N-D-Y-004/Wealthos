@@ -157,6 +157,14 @@ enum AIInsightType {
   INVESTMENT_DISCIPLINE
 }
 
+enum PriceProvider {
+  YAHOO_FINANCE
+  COINGECKO
+  AMFI
+  GOLD_MANUAL
+  MANUAL
+}
+
 model User {
   id                  String               @id @default(cuid())
   name                String?
@@ -267,6 +275,7 @@ model Asset {
   category           AssetCategory  @relation(fields: [categoryId], references: [id])
   holdings           Holding[]
   transactions       Transaction[]
+  priceSnapshots     PriceSnapshot[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   deletedAt          DateTime?
@@ -274,6 +283,24 @@ model Asset {
   @@index([type])
   @@index([symbol])
   @@index([isin])
+}
+
+model PriceSnapshot {
+  id              String        @id @default(cuid())
+  assetId         String
+  provider        PriceProvider
+  sourceSymbol    String?
+  priceMinor      BigInt
+  currency        String        @default("INR")
+  asOf            DateTime
+  fetchedAt       DateTime      @default(now())
+  isStale         Boolean       @default(false)
+  metadata        Json?
+  asset           Asset         @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, provider, asOf])
+  @@index([assetId, asOf])
+  @@index([provider, fetchedAt])
 }
 
 model Holding {
@@ -501,4 +528,3 @@ model AIInsight {
   @@index([userId, type, createdAt])
   @@unique([userId, type, inputDigest, promptVersion])
 }
-

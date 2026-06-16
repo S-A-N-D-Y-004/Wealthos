@@ -94,6 +94,15 @@ type AssetRow = {
   category: {
     kind: string;
   };
+  priceSnapshots?: PriceSnapshotRow[];
+};
+
+type PriceSnapshotRow = {
+  priceMinor: bigint | number;
+  currency: string;
+  asOf: Date;
+  fetchedAt: Date;
+  isStale?: boolean;
 };
 
 type LiabilityRow = {
@@ -202,7 +211,13 @@ export async function buildLedgerDashboardData({
           include: {
             asset: {
               include: {
-                category: true
+                category: true,
+                priceSnapshots: {
+                  orderBy: {
+                    asOf: "desc"
+                  },
+                  take: 1
+                }
               }
             }
           }
@@ -405,8 +420,12 @@ function deriveHoldingInputsFromAccounts(accounts: AccountRow[], asOf: Date): Ho
 
       const ledgerTransactions = transactions.map(mapLedgerTransaction);
       const derived = deriveHoldingFromTransactions(ledgerTransactions);
-      const latestPriceMinor = latestDefined(ledgerTransactions.map((transaction) => transaction.priceMinor));
-      const currentPriceMinor = latestPriceMinor ?? derived.averageCostMinor;
+      const latestPriceSnapshot = asset.priceSnapshots?.[0];
+      const latestTradePriceMinor = latestDefined(ledgerTransactions.map((transaction) => transaction.priceMinor));
+      const currentPriceMinor =
+        latestPriceSnapshot && latestPriceSnapshot.currency === first.currency
+          ? toNumber(latestPriceSnapshot.priceMinor)
+          : latestTradePriceMinor ?? derived.averageCostMinor;
       const currentValueMinor = Math.round(derived.quantity * currentPriceMinor);
 
       holdings.push({
