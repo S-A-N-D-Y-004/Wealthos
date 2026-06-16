@@ -3,10 +3,14 @@ import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { goalSummary } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 import { formatCompactMoney, money } from "@/lib/domain/money";
 
-export default function GoalsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function GoalsPage() {
+  const { goalSummary } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -57,4 +61,3 @@ export default function GoalsPage() {
     </AppShell>
   );
 }
-

@@ -4,10 +4,14 @@ import { ModuleHeader } from "@/components/dashboard/module-header";
 import { RetirementProjectionChart } from "@/components/dashboard/wealth-charts";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { retirementProjection } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 import { formatCompactMoney, money } from "@/lib/domain/money";
 
-export default function RetirementPage() {
+export const dynamic = "force-dynamic";
+
+export default async function RetirementPage() {
+  const { retirementProjection } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -72,4 +76,3 @@ export default function RetirementPage() {
     </AppShell>
   );
 }
-

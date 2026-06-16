@@ -5,18 +5,22 @@ import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import {
-  activities,
-  goalSummary,
-  monthlyInvestmentProgress,
-  netWorth,
-  netWorthTrend,
-  retirementProjection,
-  wealthScore
-} from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 import { formatCompactMoney, money } from "@/lib/domain/money";
 
-export default function DashboardPage() {
+export const dynamic = "force-dynamic";
+
+export default async function DashboardPage() {
+  const {
+    activities,
+    goalSummary,
+    monthlyInvestmentProgress,
+    netWorth,
+    netWorthTrend,
+    retirementProjection,
+    wealthScore
+  } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -141,4 +145,3 @@ export default function DashboardPage() {
     </AppShell>
   );
 }
-

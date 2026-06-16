@@ -4,10 +4,14 @@ import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { holdings, netWorth } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 import { formatCompactMoney, money } from "@/lib/domain/money";
 
-export default function AssetsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AssetsPage() {
+  const { holdings, netWorth } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -79,4 +83,3 @@ export default function AssetsPage() {
     </AppShell>
   );
 }
-

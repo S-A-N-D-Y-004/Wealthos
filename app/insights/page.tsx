@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { insights, wealthScore } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 
 const insightCapabilities = [
   "Net Worth Analysis",
@@ -14,7 +14,11 @@ const insightCapabilities = [
   "Investment Discipline Analysis"
 ];
 
-export default function InsightsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function InsightsPage() {
+  const { insights, wealthScore } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -80,4 +84,3 @@ export default function InsightsPage() {
     </AppShell>
   );
 }
-

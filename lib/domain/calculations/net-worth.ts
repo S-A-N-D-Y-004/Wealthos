@@ -34,7 +34,7 @@ export function calculateNetWorth(
       valueMinor,
       allocationPercent: roundPercent(percent(valueMinor, totalAssetsMinor))
     }))
-    .sort((left, right) => right.valueMinor - left.valueMinor);
+    .sort((left, right) => right.valueMinor - left.valueMinor || left.assetClass.localeCompare(right.assetClass));
 
   const holdingViews = holdings
     .map((holding) => {
@@ -72,4 +72,3 @@ export function buildNetWorthTrend(points: Array<{ date: string; assetsMinor: nu
 function roundPercent(value: number) {
   return Math.round(value * 10) / 10;
 }
-

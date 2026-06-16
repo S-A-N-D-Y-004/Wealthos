@@ -4,10 +4,14 @@ import { NetWorthTrendChart } from "@/components/dashboard/wealth-charts";
 import { MetricCard } from "@/components/dashboard/metric-card";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { liabilities, netWorth, netWorthTrend } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 import { formatCompactMoney, money } from "@/lib/domain/money";
 
-export default function NetWorthPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NetWorthPage() {
+  const { liabilities, netWorth, netWorthTrend } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -63,4 +67,3 @@ export default function NetWorthPage() {
     </AppShell>
   );
 }
-

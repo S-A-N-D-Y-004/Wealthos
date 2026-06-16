@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { alerts } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
 
 const channels = [
   { label: "In-App", icon: Bell, status: "Enabled" },
@@ -12,7 +12,11 @@ const channels = [
   { label: "Telegram", icon: MessageCircle, status: "Future" }
 ];
 
-export default function NotificationsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function NotificationsPage() {
+  const { alerts } = await getCurrentUserDashboardData();
+
   return (
     <AppShell>
       <ModuleHeader
@@ -64,4 +68,3 @@ export default function NotificationsPage() {
     </AppShell>
   );
 }
-

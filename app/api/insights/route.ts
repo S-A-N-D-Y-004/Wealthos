@@ -1,15 +1,22 @@
 import { NextResponse } from "next/server";
 import { AIInsightService, createUnavailableProvider } from "@/lib/ai/providers";
-import { netWorth, retirementProjection, wealthScore } from "@/lib/data/mock-wealth";
+import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const dashboard = await getCurrentUserDashboardData();
   const service = new AIInsightService(createUnavailableProvider("openai"));
   const insight = await service.generate({
     type: "net-worth",
     facts: {
-      netWorth,
-      retirementProjection,
-      wealthScore
+      netWorth: dashboard.netWorth,
+      assetAllocation: dashboard.netWorth.assetAllocation,
+      holdings: dashboard.netWorth.holdings,
+      liabilities: dashboard.liabilities,
+      goals: dashboard.goalSummary,
+      retirementProjection: dashboard.retirementProjection,
+      wealthScore: dashboard.wealthScore
     }
   });
 
@@ -19,4 +26,3 @@ export async function GET() {
     insight
   });
 }
-

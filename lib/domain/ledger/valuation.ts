@@ -43,7 +43,7 @@ export function calculatePortfolioValuation(
             ) / 10
     }))
     .sort(
-      (a, b) => b.valueMinor - a.valueMinor
+      (a, b) => b.valueMinor - a.valueMinor || a.assetClass.localeCompare(b.assetClass)
     );
 
   return {
