@@ -34,8 +34,12 @@ export function deriveHoldingFromTransactions(
     if (transaction.type === "SELL") {
       const qty = transaction.quantity ?? 0;
 
-      if (quantity <= 0 || qty <= 0) {
-        continue;
+      if (qty <= 0) {
+        throw new Error("SELL transaction quantity must be greater than zero.");
+      }
+
+      if (qty > quantity) {
+        throw new Error("SELL transaction quantity exceeds available holding quantity.");
       }
 
       const averageCost =
