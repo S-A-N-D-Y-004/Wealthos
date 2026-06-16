@@ -3,7 +3,7 @@ import { AppShell } from "@/components/app-shell";
 import { ModuleHeader } from "@/components/dashboard/module-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCurrentUserDashboardData } from "@/lib/dashboard/ledger-dashboard";
+import { getCurrentUserNotificationAggregation } from "@/lib/alerts";
 
 const channels = [
   { label: "In-App", icon: Bell, status: "Enabled" },
@@ -15,7 +15,8 @@ const channels = [
 export const dynamic = "force-dynamic";
 
 export default async function NotificationsPage() {
-  const { alerts } = await getCurrentUserDashboardData();
+  const notificationSummary = await getCurrentUserNotificationAggregation();
+  const alerts = notificationSummary.latest.filter((alert) => !alert.readAt);
 
   return (
     <AppShell>
@@ -29,10 +30,12 @@ export default async function NotificationsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Active Alerts</CardTitle>
-            <Badge tone="warning">{alerts.length} open</Badge>
+            <Badge tone="warning">{notificationSummary.unreadCount} unread</Badge>
           </CardHeader>
           <CardContent className="space-y-4">
-            {alerts.map((alert) => (
+            {alerts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No unread alerts.</p>
+            ) : alerts.map((alert) => (
               <article key={alert.id} className="rounded-lg border border-border p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>

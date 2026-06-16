@@ -3,8 +3,10 @@ import type { AlertItem } from "@/lib/domain/models";
 export type NotificationChannel = "in-app" | "email" | "push" | "telegram";
 
 export type NotificationPayload = Pick<AlertItem, "type" | "severity" | "title" | "message"> & {
+  alertId?: string;
   userId: string;
   channels: NotificationChannel[];
+  metadata?: Record<string, unknown>;
 };
 
 export type NotificationTransport = {
@@ -19,6 +21,10 @@ export class NotificationService {
     const selected = this.transports.filter((transport) => payload.channels.includes(transport.channel));
     await Promise.all(selected.map((transport) => transport.send(payload)));
   }
+
+  async dispatchMany(payloads: NotificationPayload[]) {
+    await Promise.all(payloads.map((payload) => this.dispatch(payload)));
+  }
 }
 
 export const inAppNotificationTransport: NotificationTransport = {
@@ -27,4 +33,3 @@ export const inAppNotificationTransport: NotificationTransport = {
     return undefined;
   }
 };
-
