@@ -1,9 +1,11 @@
 import { AI_INSIGHT_SYSTEM_POLICY, assertInsightSafety } from "@/lib/ai/insight-policy";
 
-export type AIProviderName = "openai" | "gemini" | "claude";
+export type AIProviderName = "openai" | "gemini" | "claude" | "deterministic";
 
 export type InsightPrompt = {
   type: "net-worth" | "goal" | "retirement" | "diversification" | "risk" | "discipline";
+  promptVersion?: string;
+  instructions?: string[];
   facts: Record<string, unknown>;
   userQuestion?: string;
 };
@@ -30,6 +32,8 @@ export function buildInsightMessages(prompt: InsightPrompt) {
       content: JSON.stringify(
         {
           insightType: prompt.type,
+          promptVersion: prompt.promptVersion,
+          instructions: prompt.instructions,
           facts: prompt.facts,
           userQuestion: prompt.userQuestion
         },
@@ -51,4 +55,3 @@ export function createUnavailableProvider(name: AIProviderName): AIProvider {
     }
   };
 }
-

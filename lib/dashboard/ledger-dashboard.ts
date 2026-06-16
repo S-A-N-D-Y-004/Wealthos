@@ -157,6 +157,7 @@ type AlertRow = {
   severity: string;
   title: string;
   message: string;
+  metadata?: unknown;
   createdAt: Date;
   readAt: Date | null;
 };
@@ -357,7 +358,8 @@ export async function buildLedgerDashboardData({
       title: alert.title,
       message: alert.message,
       createdAt: alert.createdAt,
-      readAt: alert.readAt ?? undefined
+      readAt: alert.readAt ?? undefined,
+      metadata: alert.metadata
     })),
     insights: insights.map((insight) => ({
       id: insight.id,

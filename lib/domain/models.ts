@@ -81,6 +81,7 @@ export type AlertItem = {
   message: string;
   createdAt: Date;
   readAt?: Date;
+  metadata?: unknown;
 };
 
 export type InsightItem = {
@@ -104,4 +105,3 @@ export type Metric = {
   trend?: string;
   tone?: "neutral" | "positive" | "warning" | "critical";
 };
-
