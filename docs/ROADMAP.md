@@ -2,93 +2,72 @@
 
 ## Current Version
 
-Version 0.1
+**Version 0.8.0**
 
-Foundation Complete
+### Completed Milestones
 
----
-
-## Phase 2A
-
-### Ledger Engine
-
-Objectives
-
-* Create transaction ledger foundation
-* Make ledger source of truth
-* Enable reconciliation
-
-Deliverables
-
-* transactions.ts
-* holdings.ts
-* valuation.ts
-* snapshots.ts
+* ✅ Foundation & Project Architecture
+* ✅ Ledger Engine
+* ✅ Holdings Derivation
+* ✅ Portfolio Valuation
+* ✅ Daily Net Worth Snapshots
+* ✅ Ledger Test Suite
+* ✅ CSV → Ledger Integration
+* ✅ Real Ledger Dashboard
+* ✅ Live Market Pricing
+* ✅ Alerts & Notifications Engine
+* ✅ AI Financial Coach
+* ✅ News & Sentiment Intelligence
 
 ---
 
-### Holdings Derivation
+# Phase 1 — Foundation ✅
 
-Objectives
+### Project Foundation
 
-* Derive holdings from transactions
-* Calculate average cost basis
-* Calculate realized gains
-* Calculate unrealized gains
+Completed
 
----
-
-### Portfolio Valuation
-
-Objectives
-
-* Portfolio value calculations
-* Asset allocation calculations
-* Category allocation calculations
+* Next.js 15 App Router
+* TypeScript
+* Tailwind CSS
+* shadcn/ui
+* Prisma ORM
+* Auth.js foundation
+* Trigger.dev job scaffolding
+* Modular architecture
+* Documentation
+* GitHub workflow
 
 ---
 
-### Daily Net Worth Snapshots
+# Phase 2 — Financial Core ✅
 
-Objectives
+## Ledger Engine
 
-* Historical wealth tracking
-* Daily net worth history
-* Long-term wealth analytics
+Completed
 
----
+* Transaction Ledger
+* Holdings Derivation
+* Portfolio Valuation
+* Daily Net Worth Snapshots
 
-## Phase 2B
+### Features
 
-### Transactions Module
-
-Features
-
-* Transaction history
-* Search
-* Filters
-* Pagination
-
----
-
-### Account Management
-
-Supported Accounts
-
-* Angel One
-* CoinDCX
-* Zerodha Kite
-* Paytm Money
-* PhonePe Gold
-* ICICI Prudential
+* Immutable transactions
+* Derived holdings
+* Average cost calculations
+* Realized gains
+* Unrealized gains
+* Portfolio allocation
+* Historical snapshots
 
 ---
 
-## Phase 2C
+## Import Engine
 
-### CSV Import Expansion
+Completed
 
-Sources
+Supported Sources
 
 * Angel One
 * CoinDCX
@@ -99,30 +78,210 @@ Sources
 
 Features
 
-* Validation
-* Duplicate Detection
-* Import History
-* Audit Trail
+* CSV validation
+* Duplicate detection
+* Idempotent imports
+* Audit trail
+* Ledger persistence
 
 ---
 
-## Future
+## Dashboard
 
-### Phase 3
+Completed
 
-* Real Broker Integrations
-* Live Market Data
-* Wealth Reports
-* Advanced Analytics
+* Real ledger-backed dashboard
+* Net worth
+* Portfolio allocation
+* Holdings
+* Goals
+* Retirement
+* Notifications
 
-### Phase 4
+---
 
-* Mobile Application
-* PWA Support
-* Real-Time Notifications
+## Live Pricing
 
-### Phase 5
+Completed
 
+Supported Providers
+
+* Yahoo Finance
+* CoinGecko
+* AMFI
+* Manual Gold Provider
+
+Features
+
+* Price snapshots
+* Scheduled refresh
+* Cached prices
+* Stale-price fallback
+
+---
+
+## Alerts & Notifications
+
+Completed
+
+Features
+
+* Portfolio alerts
+* Allocation alerts
+* Goal alerts
+* System alerts
+* Notification aggregation
+* Read/Unread tracking
+
+---
+
+## AI Financial Coach
+
+Completed
+
+Capabilities
+
+* Portfolio-aware AI
+* Wealth score explanations
+* Goal analysis
+* Retirement insights
+* Alert explanations
+* Deterministic prompts
+* Advisory-only responses
+
+---
+
+## News & Sentiment Intelligence
+
+Completed
+
+Features
+
+* Symbol-based news
+* Portfolio-linked news
+* Sentiment scoring
+* AI explanations
+* News-driven alerts
+
+---
+
+# Phase 3 — Production Hardening (Current Focus)
+
+## Authentication & Security
+
+Planned
+
+* Production Auth.js
+* Google Sign-In
+* Email Authentication
+* Protected Routes
+* Session Management
+* Secure Secrets
+* Role-Based Access
+
+---
+
+## Platform Quality
+
+Planned
+
+* Repository cleanup
+* Architecture review
+* Error handling improvements
+* Logging
+* Performance optimization
+* Test coverage expansion
+* CI/CD pipeline
+
+---
+
+# Phase 4 — Portfolio Analytics
+
+Planned
+
+Features
+
+* XIRR
+* CAGR
+* Time-Weighted Return
+* Money-Weighted Return
+* Volatility
+* Drawdown
+* Sharpe Ratio
+* Diversification Score
+* Asset Correlation
+
+---
+
+# Phase 5 — Financial Planning
+
+Planned
+
+* FIRE Calculator
+* Coast FIRE
+* Barista FIRE
+* Retirement Simulator
+* Monte Carlo Simulation
+* Education Planning
+* Home Purchase Planning
+
+---
+
+# Phase 6 — Broker Connectivity
+
+Planned
+
+Direct Integrations
+
+* Angel One API
+* Zerodha Kite Connect
+* CoinDCX API
+* ICICI Prudential
+* Additional Broker APIs
+
+CSV imports will remain supported as a fallback.
+
+---
+
+# Phase 7 — Mobile Experience
+
+Planned
+
+* Progressive Web App (PWA)
+* Offline Mode
+* Push Notifications
+* Background Sync
+* Mobile-first Experience
+
+---
+
+# Phase 8 — WealthOS Intelligence
+
+Future Vision
+
+* AI Portfolio Reviews
+* Monthly Wealth Reports
 * Tax Analytics
-* Retirement Optimization
 * Family Wealth Dashboard
+* Estate Planning
+* Goal Optimization
+* Personalized Financial Insights
+
+---
+
+# Engineering Principles
+
+WealthOS follows these core principles:
+
+* Transactions are immutable.
+* Holdings are always derived from transactions.
+* The ledger is the single source of truth.
+* AI is advisory only.
+* No automatic investment decisions.
+* Every calculation must be deterministic and testable.
+* Every major feature must pass:
+
+  * Type checking
+  * Unit tests
+  * Production build
+  * Prisma validation
