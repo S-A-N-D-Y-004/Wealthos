@@ -7,7 +7,6 @@ import {
   calculateInvestmentPeriodYears,
   calculateNetInvestedAmount,
   calculateSimpleAnnualizedReturnPercent,
-  calculateXirr,
   resolveAnalyticsTimeRange,
   summarizeHoldingReturns,
   summarizePortfolioReturns,
@@ -236,19 +235,21 @@ describe("portfolio return calculations", () => {
     });
   });
 
-  it("keeps XIRR as an explicit Issue 10B scaffold", () => {
-    expect(() => calculateXirr({
+  it("keeps portfolio summary calculations independent from money-weighted returns", () => {
+    const summary = summarizePortfolioReturns({
       cashFlows: [
         {
-          amountMinor: -100000,
+          type: "INVESTMENT",
+          amountMinor: 100000,
           occurredAt: ONE_YEAR.startDate
-        },
-        {
-          amountMinor: 121000,
-          occurredAt: ONE_YEAR.endDate
         }
-      ]
-    })).toThrow("XIRR calculation is not implemented yet.");
+      ],
+      currentValueMinor: 121000,
+      endDate: ONE_YEAR.endDate
+    });
+
+    expect(summary.cagrPercent).toBe(21);
+    expect(summary.annualizedReturnPercent).toBe(21);
   });
 });
 

@@ -19,6 +19,7 @@
 * ✅ AI Financial Coach
 * ✅ News & Sentiment Intelligence
 * ✅ Portfolio Return Calculations
+* ✅ XIRR & Money-Weighted Return
 
 ---
 
@@ -212,7 +213,8 @@ Features
 * Annualized return
 * Portfolio return summaries
 * Time range support
-* XIRR scaffold for Issue 10B
+* XIRR
+* Money-weighted return
 
 ---
 
@@ -222,10 +224,7 @@ Planned
 
 Features
 
-* XIRR
-* CAGR
 * Time-Weighted Return
-* Money-Weighted Return
 * Volatility
 * Drawdown
 * Sharpe Ratio
