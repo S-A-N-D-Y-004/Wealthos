@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { apiServerError, apiSuccess, apiUnauthorized } from "@/lib/api/responses";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import {
@@ -11,36 +11,42 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const session = await auth();
+  try {
+    const session = await auth();
 
-  if (!session?.user?.id) {
-    return NextResponse.json({
-      articles: []
+    if (!session?.user?.id) {
+      return apiUnauthorized();
+    }
+
+    const articles = await getNewsForUser({
+      userId: session.user.id,
+      client: prisma as unknown as NewsPrismaClient
     });
+
+    return apiSuccess({
+      articles
+    });
+  } catch {
+    return apiServerError();
   }
-
-  const articles = await getNewsForUser({
-    userId: session.user.id,
-    client: prisma as unknown as NewsPrismaClient
-  });
-
-  return NextResponse.json({
-    articles
-  });
 }
 
 export async function POST() {
-  const session = await auth();
+  try {
+    const session = await auth();
 
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.id) {
+      return apiUnauthorized();
+    }
+
+    const result = await refreshNewsForUser({
+      userId: session.user.id,
+      client: prisma as unknown as NewsPrismaClient,
+      providers: defaultNewsProviders()
+    });
+
+    return apiSuccess(result);
+  } catch {
+    return apiServerError();
   }
-
-  const result = await refreshNewsForUser({
-    userId: session.user.id,
-    client: prisma as unknown as NewsPrismaClient,
-    providers: defaultNewsProviders()
-  });
-
-  return NextResponse.json(result);
 }
