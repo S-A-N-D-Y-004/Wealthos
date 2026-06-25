@@ -1,18 +1,36 @@
 # WealthOS Data Model
 
-## Overview
+# Overview
 
-This document describes the core entities used by WealthOS and how they relate to each other.
+This document describes the core domain entities used throughout WealthOS and how they relate to each other.
 
-The transaction ledger is the source of truth.
+WealthOS follows a deterministic financial architecture where the **Transaction Ledger is the single source of truth**.
 
-Data Flow:
+Every portfolio value, holding, alert, AI insight, and dashboard metric is ultimately derived from recorded transactions.
 
+---
+
+# Core Data Flow
+
+```text
 Transactions
-→ Holdings
-→ Portfolio
-→ Net Worth
-→ Analytics
+        ↓
+Holdings
+        ↓
+Portfolio
+        ↓
+Net Worth
+        ↓
+Analytics
+        ↓
+Alerts
+        ↓
+AI Insights
+        ↓
+Dashboard
+```
+
+This flow must never be bypassed.
 
 ---
 
@@ -20,21 +38,27 @@ Transactions
 
 ## Purpose
 
-Represents a WealthOS user.
+Represents an authenticated WealthOS user.
 
 ## Relationships
 
+```
 User
-→ Accounts
-→ Goals
-→ Transactions
-→ NetWorthSnapshots
+├── Accounts
+├── Goals
+├── Transactions
+├── NetWorthSnapshots
+├── Alerts
+├── AIInsights
+└── ImportJobs
+```
 
 ## Future Extensions
 
 * Family Accounts
 * Shared Portfolios
-* Multiple Profiles
+* Multi-user Collaboration
+* Teams
 
 ---
 
@@ -42,7 +66,7 @@ User
 
 ## Purpose
 
-Represents a financial account or investment platform.
+Represents a brokerage, exchange, bank account, or investment platform.
 
 ## Examples
 
@@ -55,15 +79,20 @@ Represents a financial account or investment platform.
 
 ## Relationships
 
+```
 Account
-→ Transactions
-→ Holdings
+├── Transactions
+├── Holdings (Derived)
+└── ImportJobs
+```
 
 ## Future Extensions
 
-* API Sync
-* Last Sync Status
-* Import History
+* Broker API Sync
+* OAuth Integration
+* Last Synchronization
+* Sync Health
+* Account Balances
 
 ---
 
@@ -71,9 +100,9 @@ Account
 
 ## Purpose
 
-Represents an investable asset.
+Represents an investable financial instrument.
 
-## Examples
+## Supported Types
 
 * Stocks
 * ETFs
@@ -81,18 +110,25 @@ Represents an investable asset.
 * Crypto
 * Gold
 * Cash
+* Fixed Deposits
 
 ## Relationships
 
+```
 Asset
-→ Transactions
-→ Holdings
+├── Transactions
+├── Holdings
+├── PriceSnapshots
+└── NewsArticles
+```
 
 ## Future Extensions
 
-* Live Prices
 * Sector Classification
-* Risk Classification
+* Industry Classification
+* Risk Rating
+* ESG Rating
+* Currency Support
 
 ---
 
@@ -100,9 +136,9 @@ Asset
 
 ## Purpose
 
-Source of truth for all financial activity.
+The immutable ledger and primary source of truth.
 
-## Examples
+## Supported Types
 
 * Buy
 * Sell
@@ -111,19 +147,26 @@ Source of truth for all financial activity.
 * Interest
 * Deposit
 * Withdrawal
+* Fees
+* Taxes
+* Transfers
+* Adjustments
 
 ## Relationships
 
+```
 Transaction
-→ Account
-Transaction
-→ Asset
+├── User
+├── Account
+└── Asset
+```
 
 ## Rules
 
-Transactions create holdings.
-
-Holdings must never replace transactions as the source of truth.
+* Transactions are immutable.
+* Transactions create holdings.
+* Historical transactions are never modified.
+* Corrections are recorded as new transactions.
 
 ---
 
@@ -131,21 +174,60 @@ Holdings must never replace transactions as the source of truth.
 
 ## Purpose
 
-Represents the current position derived from transactions.
+Represents the current position derived entirely from transactions.
 
-## Calculated Values
+## Calculated Fields
 
 * Quantity
 * Average Cost
+* Cost Basis
+* Market Value
 * Realized Gain/Loss
 * Unrealized Gain/Loss
+* Allocation Percentage
 
 ## Relationships
 
+```
 Holding
-→ Account
-Holding
-→ Asset
+├── Account
+└── Asset
+```
+
+## Rules
+
+Holdings are projections.
+
+They must never replace transactions as the primary source of truth.
+
+---
+
+# Price Snapshot
+
+## Purpose
+
+Stores historical market prices used for portfolio valuation.
+
+## Data Stored
+
+* Asset
+* Price
+* Currency
+* Provider
+* Timestamp
+
+## Providers
+
+* Yahoo Finance
+* CoinGecko
+* AMFI
+* Manual Gold Provider
+
+## Usage
+
+* Portfolio Valuation
+* Historical Pricing
+* Performance Analysis
 
 ---
 
@@ -158,14 +240,24 @@ Represents a financial objective.
 ## Examples
 
 * Emergency Fund
-* House Purchase
 * Retirement
-* Car Purchase
+* House Purchase
+* Vehicle Purchase
+* Education Fund
+* Custom Goals
 
 ## Relationships
 
+```
 Goal
-→ User
+└── User
+```
+
+## Future Extensions
+
+* FIRE Planning
+* Monte Carlo Simulation
+* Goal Forecasting
 
 ---
 
@@ -179,15 +271,17 @@ Stores historical net worth values.
 
 * Assets
 * Liabilities
-* Net Worth
-* Cash
 * Investments
+* Cash
+* Net Worth
+* Snapshot Date
 
-## Future Usage
+## Usage
 
 * Historical Charts
-* CAGR
-* Wealth Growth Tracking
+* Wealth Growth
+* Performance Trends
+* CAGR Calculations
 
 ---
 
@@ -203,11 +297,51 @@ Tracks CSV imports and future broker synchronizations.
 * Duplicate Detection
 * Import Status
 * Error Tracking
+* Audit Trail
+
+## Supported Sources
+
+* Angel One
+* CoinDCX
+* Zerodha Kite
+* Paytm Money
+* PhonePe Gold
+* ICICI Prudential
 
 ## Future Extensions
 
-* API Imports
-* Scheduled Sync
+* Scheduled API Sync
+* Incremental Imports
+* Webhooks
+
+---
+
+# Alert
+
+## Purpose
+
+Represents notifications generated by business rules.
+
+## Categories
+
+* Portfolio
+* Allocation
+* Goal
+* Market
+* System
+
+## States
+
+* Unread
+* Read
+* Archived
+
+## Relationships
+
+```
+Alert
+└── User
+```
 
 ---
 
@@ -217,27 +351,107 @@ Tracks CSV imports and future broker synchronizations.
 
 Stores AI-generated financial observations.
 
+## Responsibilities
+
+* Wealth Score Explanation
+* Goal Analysis
+* Retirement Insights
+* Diversification Analysis
+* Portfolio Summary
+* Alert Explanations
+
 ## Rules
 
-AI can:
+AI may:
 
 * Explain
-* Educate
 * Analyze
 * Summarize
+* Educate
 
-AI cannot:
+AI must never:
 
-* Recommend buys
-* Recommend sells
+* Recommend buying
+* Recommend selling
 * Predict prices
+* Execute trades
+
+---
+
+# News Article
+
+## Purpose
+
+Stores market news associated with tracked assets.
+
+## Data Stored
+
+* Title
+* Source
+* Published Date
+* Asset Symbol
+* Sentiment
+* Summary
+
+## Usage
+
+* News Feed
+* Sentiment Analysis
+* Portfolio Alerts
+* AI Explanations
+
+---
+
+# Relationships Summary
+
+```text
+User
+├── Accounts
+├── Goals
+├── Transactions
+├── Alerts
+├── AIInsights
+├── NetWorthSnapshots
+└── ImportJobs
+
+Account
+├── Transactions
+└── Holdings
+
+Asset
+├── Transactions
+├── Holdings
+├── PriceSnapshots
+└── NewsArticles
+
+Transactions
+        ↓
+Holdings
+        ↓
+Portfolio
+        ↓
+Net Worth
+        ↓
+Analytics
+        ↓
+Alerts
+        ↓
+AI Insights
+```
 
 ---
 
 # Design Principles
 
-1. Transaction Ledger is the source of truth.
-2. Financial calculations must be deterministic.
-3. Data integrity is more important than convenience.
-4. Holdings are derived from transactions.
-5. Net worth is derived from assets and liabilities.
+WealthOS follows these data model principles:
+
+1. The Transaction Ledger is the single source of truth.
+2. Transactions are immutable.
+3. Holdings are always derived.
+4. Financial calculations are deterministic.
+5. External data (prices and news) enriches analysis but never changes historical transactions.
+6. AI is advisory only.
+7. Every entity is designed for auditability.
+8. Data integrity always takes precedence over convenience.
+9. Historical financial records must remain reproducible.
+10. The data model must support long-term extensibility without breaking existing records.
