@@ -20,6 +20,7 @@
 * ✅ News & Sentiment Intelligence
 * ✅ Portfolio Return Calculations
 * ✅ XIRR & Money-Weighted Return
+* ✅ Portfolio Risk Analytics
 
 ---
 
@@ -220,16 +221,21 @@ Features
 
 ## Advanced Analytics
 
-Planned
+In Progress
 
 Features
 
 * Time-Weighted Return
-* Volatility
-* Drawdown
 * Sharpe Ratio
-* Diversification Score
 * Asset Correlation
+
+Completed
+
+* Portfolio volatility
+* Maximum drawdown
+* Diversification score
+* Concentration risk
+* Unified risk rating
 
 ---
 
