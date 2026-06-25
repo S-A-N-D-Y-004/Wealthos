@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
+import { requireAuthenticatedSession } from "@/lib/auth-session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,11 +18,15 @@ export const metadata: Metadata = {
   description: "Enterprise-grade personal wealth operating system"
 };
 
-export default function RootLayout({
+export const dynamic = "force-dynamic";
+
+export default async function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await requireAuthenticatedSession();
+
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
@@ -30,4 +35,3 @@ export default function RootLayout({
     </html>
   );
 }
-

@@ -33,6 +33,7 @@ class FakeLedgerPrisma implements LedgerImportPrismaClient {
   importJobUpdates: unknown[] = [];
   assetCreates: unknown[] = [];
   createManyCalls = 0;
+  accountBelongsToUser = true;
 
   private assetIdByName = new Map<string, string>();
   private categoryIdByName = new Map<string, string>();
@@ -41,6 +42,19 @@ class FakeLedgerPrisma implements LedgerImportPrismaClient {
     this.operations.push("transaction");
     return callback(this);
   }
+
+  account = {
+    findFirst: async (args: unknown) => {
+      this.operations.push("account.findFirst");
+
+      if (!this.accountBelongsToUser) {
+        return null;
+      }
+
+      const where = (args as { where: { id: string } }).where;
+      return { id: where.id };
+    }
+  };
 
   importJob = {
     update: async (args: unknown) => {
@@ -267,6 +281,29 @@ describe("CSV ledger persistence", () => {
         rejectedRows: 0
       }
     });
+  });
+
+  it("rejects imports into accounts that do not belong to the authenticated user", async () => {
+    const client = new FakeLedgerPrisma();
+    client.accountBelongsToUser = false;
+    const csv = [
+      "trade_date,symbol,trade_type,quantity,price",
+      "2026-01-01,NIFTYBEES,BUY,10,100"
+    ].join("\n");
+
+    await expect(persistCsvImportToLedger(
+      {
+        userId: "user-1",
+        accountId: "account-owned-by-user-2",
+        source: "ZERODHA_KITE",
+        csv
+      },
+      client
+    )).rejects.toThrow("Account does not belong to authenticated user.");
+
+    expect(client.createManyCalls).toBe(0);
+    expect(client.transactions).toEqual([]);
+    expect(client.operations).toEqual(["account.findFirst"]);
   });
 
   it("wires import processing jobs to ledger persistence", async () => {

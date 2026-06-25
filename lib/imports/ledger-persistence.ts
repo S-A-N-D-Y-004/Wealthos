@@ -37,6 +37,9 @@ export type LedgerImportPrismaClient = {
   importJob?: {
     update(args: unknown): Promise<unknown>;
   };
+  account: {
+    findFirst(args: unknown): Promise<{ id: string } | null>;
+  };
   assetCategory: {
     upsert(args: unknown): Promise<{ id: string }>;
   };
@@ -71,6 +74,8 @@ export async function persistCsvImportToLedger(
   input: LedgerImportInput,
   client: LedgerImportPrismaClient
 ): Promise<LedgerImportResult> {
+  await assertAccountOwnership(client, input.userId, input.accountId);
+
   const conversion = convertCsvToLedgerTransactions({
     source: input.source,
     csv: input.csv,
@@ -159,6 +164,27 @@ export async function persistCsvImportToLedger(
   }
 
   return result;
+}
+
+async function assertAccountOwnership(
+  client: LedgerImportPrismaClient,
+  userId: string,
+  accountId: string
+) {
+  const account = await client.account.findFirst({
+    where: {
+      id: accountId,
+      userId,
+      deletedAt: null
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (!account) {
+    throw new Error("Account does not belong to authenticated user.");
+  }
 }
 
 async function resolveAssets(
