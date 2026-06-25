@@ -129,6 +129,10 @@ class FakeAIInsightClient implements AIInsightPrismaClient {
     findMany: async () => []
   };
 
+  newsArticle = {
+    findMany: async () => []
+  };
+
   aiInsight = {
     findMany: async () => [],
     createMany: async (args: unknown) => {

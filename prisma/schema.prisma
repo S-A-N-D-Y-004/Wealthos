@@ -165,6 +165,12 @@ enum PriceProvider {
   MANUAL
 }
 
+enum NewsSentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
 model User {
   id                  String               @id @default(cuid())
   name                String?
@@ -276,6 +282,7 @@ model Asset {
   holdings           Holding[]
   transactions       Transaction[]
   priceSnapshots     PriceSnapshot[]
+  newsArticles       NewsArticleAsset[]
   createdAt          DateTime       @default(now())
   updatedAt          DateTime       @updatedAt
   deletedAt          DateTime?
@@ -301,6 +308,42 @@ model PriceSnapshot {
   @@unique([assetId, provider, asOf])
   @@index([assetId, asOf])
   @@index([provider, fetchedAt])
+}
+
+model NewsArticle {
+  id              String             @id @default(cuid())
+  provider        String
+  sourceId        String?
+  url             String?
+  title           String
+  summary         String?
+  sourceName      String?
+  publishedAt     DateTime
+  sentiment       NewsSentiment      @default(NEUTRAL)
+  sentimentScore  Decimal            @db.Decimal(6, 4)
+  metadata        Json?
+  assets          NewsArticleAsset[]
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@unique([provider, sourceId])
+  @@unique([provider, url])
+  @@index([sentiment, publishedAt])
+  @@index([publishedAt])
+}
+
+model NewsArticleAsset {
+  id              String       @id @default(cuid())
+  articleId       String
+  assetId         String
+  symbol          String?
+  relevance       Decimal?     @db.Decimal(5, 4)
+  article         NewsArticle  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  asset           Asset        @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  createdAt       DateTime     @default(now())
+
+  @@unique([articleId, assetId])
+  @@index([assetId])
 }
 
 model Holding {

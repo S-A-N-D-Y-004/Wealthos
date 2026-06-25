@@ -93,6 +93,21 @@ export type InsightItem = {
   createdAt: Date;
 };
 
+export type NewsSentiment = "Positive" | "Neutral" | "Negative";
+
+export type NewsItem = {
+  id: string;
+  title: string;
+  summary?: string;
+  url?: string;
+  sourceName?: string;
+  publishedAt: Date;
+  sentiment: NewsSentiment;
+  sentimentScore: number;
+  symbols: string[];
+  assetNames: string[];
+};
+
 export type HoldingView = HoldingInput & {
   gainLossMinor: number;
   gainLossPercent: number;

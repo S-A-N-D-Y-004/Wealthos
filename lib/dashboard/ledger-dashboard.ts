@@ -12,7 +12,8 @@ import type {
   GoalInput,
   HoldingInput,
   InsightItem,
-  LiabilityInput
+  LiabilityInput,
+  NewsItem
 } from "@/lib/domain/models";
 
 export type LedgerDashboardData = {
@@ -35,6 +36,7 @@ export type LedgerDashboardData = {
   activities: ActivityItem[];
   alerts: AlertItem[];
   insights: InsightItem[];
+  news: NewsItem[];
 };
 
 export type DashboardPrismaClient = {
@@ -61,6 +63,9 @@ export type DashboardPrismaClient = {
   };
   aiInsight: {
     findMany(args: unknown): Promise<AIInsightRow[]>;
+  };
+  newsArticle: {
+    findMany(args: unknown): Promise<NewsArticleRow[]>;
   };
 };
 
@@ -171,6 +176,24 @@ type AIInsightRow = {
   createdAt: Date;
 };
 
+type NewsArticleRow = {
+  id: string;
+  title: string;
+  summary: string | null;
+  url: string | null;
+  sourceName: string | null;
+  publishedAt: Date;
+  sentiment: string;
+  sentimentScore: unknown;
+  assets?: Array<{
+    symbol: string | null;
+    asset?: {
+      name: string;
+      symbol: string | null;
+    };
+  }>;
+};
+
 export async function getCurrentUserDashboardData() {
   const [{ auth }, { prisma }] = await Promise.all([import("@/lib/auth"), import("@/lib/db")]);
   const session = await auth();
@@ -194,7 +217,7 @@ export async function buildLedgerDashboardData({
   client: DashboardPrismaClient;
   asOf?: Date;
 }): Promise<LedgerDashboardData> {
-  const [accounts, liabilities, goals, retirementProfile, snapshots, activities, alerts, insights] = await Promise.all([
+  const [accounts, liabilities, goals, retirementProfile, snapshots, activities, alerts, insights, news] = await Promise.all([
     client.account.findMany({
       where: {
         userId,
@@ -291,6 +314,33 @@ export async function buildLedgerDashboardData({
         createdAt: "desc"
       },
       take: 5
+    }),
+    client.newsArticle.findMany({
+      where: {
+        assets: {
+          some: {
+            asset: {
+              transactions: {
+                some: {
+                  userId,
+                  deletedAt: null
+                }
+              }
+            }
+          }
+        }
+      },
+      include: {
+        assets: {
+          include: {
+            asset: true
+          }
+        }
+      },
+      orderBy: {
+        publishedAt: "desc"
+      },
+      take: 10
     })
   ]);
   const holdings = deriveHoldingInputsFromAccounts(accounts, asOf);
@@ -368,7 +418,8 @@ export async function buildLedgerDashboardData({
       body: insight.body,
       confidence: insight.confidence === null ? 0 : toNumber(insight.confidence),
       createdAt: insight.createdAt
-    }))
+    })),
+    news: news.map(mapNewsArticle)
   };
 }
 
@@ -401,7 +452,25 @@ export function createZeroDashboardData(asOf = new Date()): LedgerDashboardData 
     },
     activities: [],
     alerts: [],
-    insights: []
+    insights: [],
+    news: []
+  };
+}
+
+function mapNewsArticle(article: NewsArticleRow): NewsItem {
+  const assets = article.assets ?? [];
+
+  return {
+    id: article.id,
+    title: article.title,
+    summary: article.summary ?? undefined,
+    url: article.url ?? undefined,
+    sourceName: article.sourceName ?? undefined,
+    publishedAt: article.publishedAt,
+    sentiment: titleCase(article.sentiment) as NewsItem["sentiment"],
+    sentimentScore: toNumber(article.sentimentScore),
+    symbols: uniqueStrings(assets.map((item) => item.symbol ?? item.asset?.symbol ?? undefined)),
+    assetNames: uniqueStrings(assets.map((item) => item.asset?.name))
   };
 }
 
@@ -694,6 +763,10 @@ function titleCase(value: string) {
 
 function latestDefined<T>(values: Array<T | undefined>) {
   return values.filter((value): value is T => value !== undefined).at(-1);
+}
+
+function uniqueStrings(values: Array<string | undefined>) {
+  return [...new Set(values.filter((value): value is string => Boolean(value)))].sort((left, right) => left.localeCompare(right));
 }
 
 function toNumber(value: unknown) {

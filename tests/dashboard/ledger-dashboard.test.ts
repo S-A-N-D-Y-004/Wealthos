@@ -339,6 +339,7 @@ function fakeDashboardClient(data: {
   activities?: unknown[];
   alerts?: unknown[];
   insights?: unknown[];
+  news?: unknown[];
 } = {}): DashboardPrismaClient {
   return {
     account: {
@@ -364,6 +365,9 @@ function fakeDashboardClient(data: {
     },
     aiInsight: {
       findMany: async () => data.insights ?? []
+    },
+    newsArticle: {
+      findMany: async () => data.news ?? []
     }
   } as DashboardPrismaClient;
 }

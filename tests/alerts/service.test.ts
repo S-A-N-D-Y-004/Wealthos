@@ -222,6 +222,10 @@ class FakeAlertClient implements AlertEnginePrismaClient {
     findMany: async () => []
   };
 
+  newsArticle = {
+    findMany: async () => []
+  };
+
   asset = {
     findMany: async () => this.data.assets ?? []
   };

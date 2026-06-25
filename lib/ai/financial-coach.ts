@@ -102,6 +102,15 @@ export type FinancialCoachContext = {
     asOf?: string;
     summary: string;
   }>;
+  news: Array<{
+    id: string;
+    title: string;
+    sentiment: string;
+    sentimentScore: number;
+    symbols: string[];
+    assetNames: string[];
+    publishedAt: string;
+  }>;
   guardrails: string[];
 };
 
@@ -204,6 +213,18 @@ export function buildFinancialCoachContext(
       createdAt: alert.createdAt.toISOString()
     }));
   const priceMovements = extractPriceMovements(dashboard.alerts);
+  const news = [...dashboard.news]
+    .sort((left, right) => right.publishedAt.getTime() - left.publishedAt.getTime() || left.title.localeCompare(right.title))
+    .slice(0, maxAlerts)
+    .map((article) => ({
+      id: article.id,
+      title: article.title,
+      sentiment: article.sentiment,
+      sentimentScore: article.sentimentScore,
+      symbols: article.symbols,
+      assetNames: article.assetNames,
+      publishedAt: article.publishedAt.toISOString()
+    }));
 
   return {
     asOf: asOf.toISOString(),
@@ -257,6 +278,7 @@ export function buildFinancialCoachContext(
     },
     alerts,
     priceMovements,
+    news,
     guardrails: GUARDRAILS
   };
 }
@@ -290,7 +312,13 @@ export function buildFinancialCoachPrompt({
       outputContract: {
         style: "concise educational analysis",
         include: config.include,
-        avoid: ["buy/sell/hold instructions", "price predictions", "trade execution", "unsupported personal assumptions"]
+        avoid: [
+          "buy/sell/hold instructions",
+          "price predictions",
+          "trade execution",
+          "unsupported personal assumptions",
+          "treating sentiment as a trading signal"
+        ]
       }
     },
     userQuestion
@@ -577,6 +605,7 @@ function deterministicCoachResponse({
   const offTrackGoal = context.goals.offTrack[0];
   const alert = context.alerts[0];
   const movement = context.priceMovements[0];
+  const news = context.news[0];
 
   switch (capability) {
     case "wealth-score":
@@ -596,7 +625,11 @@ function deterministicCoachResponse({
         : "No retirement profile is available, so readiness analysis is limited to noting that retirement assumptions have not been supplied.";
     case "alerts":
       return alert
-        ? `The highest-priority alert is ${alert.severity}: ${alert.title}. Treat it as a diagnostic signal to investigate the underlying ledger or price data.`
+        ? [
+            `The highest-priority alert is ${alert.severity}: ${alert.title}.`,
+            news ? `Related news context includes ${news.title} with ${news.sentiment.toLowerCase()} sentiment.` : undefined,
+            "Treat alerts as diagnostic signals for review, not trade instructions."
+          ].filter(Boolean).join(" ")
         : "There are no unread alerts in the supplied context.";
     case "allocation-risk":
     case "concentration-analysis":
@@ -615,6 +648,9 @@ function deterministicCoachResponse({
         movement
           ? `Recent price-movement context includes ${movement.summary}.`
           : "No recent price-movement alert is present in the supplied context.",
+        news
+          ? `News context includes ${news.title} with ${news.sentiment.toLowerCase()} sentiment for ${news.symbols.join(", ") || "a holding"}.`
+          : "No linked news article is present in the supplied context.",
         topAllocation
           ? `The largest allocation is ${topAllocation.assetClass} at ${formatPercent(topAllocation.allocationPercent)}.`
           : "No allocation data is available yet."
