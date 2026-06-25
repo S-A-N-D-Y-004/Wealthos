@@ -1,5 +1,6 @@
 import type { LedgerTransaction, LedgerTransactionType } from "@/lib/domain/ledger";
 import { createHash } from "crypto";
+import { invalidateDashboardProjection } from "@/lib/dashboard/projections";
 import { deriveHoldingFromTransactions } from "@/lib/domain/ledger";
 import type { ImportSource } from "@/lib/imports/broker-registry";
 import {
@@ -102,7 +103,7 @@ export async function persistCsvImportToLedger(
     };
   }
 
-  return runInTransaction(client, async (tx) => {
+  const result: LedgerImportResult = await runInTransaction(client, async (tx) => {
     await updateImportJob(tx, input.importJobId, {
       status: "IMPORTING",
       startedAt: input.importedAt ?? new Date()
@@ -152,6 +153,12 @@ export async function persistCsvImportToLedger(
       idempotencyKeys: conversion.transactions.map((transaction) => transaction.idempotencyKey)
     };
   });
+
+  if (result.createdTransactions > 0) {
+    invalidateDashboardProjection(input.userId, "csv-import");
+  }
+
+  return result;
 }
 
 async function resolveAssets(

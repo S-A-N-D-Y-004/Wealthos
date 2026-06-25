@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { stableAlertId } from "@/lib/alerts/rules";
+import { invalidateDashboardProjection } from "@/lib/dashboard/projections";
 import { RateLimiter } from "@/lib/pricing/cache";
 import { NewsArticleCache } from "@/lib/news/cache";
 import {
@@ -128,6 +129,11 @@ export async function refreshNewsForUser(options: NewsRefreshOptions) {
   const articlesPersisted = await persistNewsArticles(options.client, uniqueArticles);
   const linksPersisted = await persistNewsLinks(options.client, uniqueArticles);
   const alertsPersisted = await persistNewsAlerts(options.client, options.userId, uniqueArticles, asOf);
+  const persistedCount = articlesPersisted + linksPersisted + alertsPersisted;
+
+  if (persistedCount > 0) {
+    invalidateDashboardProjection(options.userId, "news-update");
+  }
 
   return {
     refreshedAt: asOf,

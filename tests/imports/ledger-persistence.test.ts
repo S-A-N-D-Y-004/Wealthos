@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+  clearDashboardProjectionCache,
+  getDashboardProjectionCacheStats
+} from "@/lib/dashboard/projections";
 import { processImportJob } from "@/trigger/jobs/import-processing";
 import {
   persistCsvImportToLedger,
@@ -124,6 +128,10 @@ class FakeLedgerPrisma implements LedgerImportPrismaClient {
 }
 
 describe("CSV ledger persistence", () => {
+  beforeEach(() => {
+    clearDashboardProjectionCache();
+  });
+
   it("persists transactions and recomputes holdings after import", async () => {
     const client = new FakeLedgerPrisma();
     const csv = [
@@ -186,6 +194,9 @@ describe("CSV ledger persistence", () => {
         }
       }
     });
+    expect(getDashboardProjectionCacheStats().userVersions).toEqual({
+      "user-1": 1
+    });
   });
 
   it("prevents duplicate imports using idempotency keys and stable transaction IDs", async () => {
@@ -221,6 +232,9 @@ describe("CSV ledger persistence", () => {
     expect(client.transactions).toHaveLength(1);
     expect(client.transactions[0].id).toBe(firstTransactionId);
     expect(first.idempotencyKeys).toEqual(second.idempotencyKeys);
+    expect(getDashboardProjectionCacheStats().userVersions).toEqual({
+      "user-1": 1
+    });
   });
 
   it("does not persist transactions when CSV conversion requires validation", async () => {

@@ -202,6 +202,38 @@ They must never replace transactions as the primary source of truth.
 
 ---
 
+# Dashboard Projection Cache
+
+## Purpose
+
+Stores runtime dashboard projections for faster reads.
+
+This is not a persisted financial model and is not a source of truth.
+
+## Data Derived
+
+* Accounts
+* Assets
+* Transactions summary
+* Derived holdings
+* Liabilities
+* Goals
+* Net worth
+* Allocation
+* Alerts
+* AI insights
+* News
+
+## Rules
+
+* Rebuilds always start from the transaction ledger and related source records.
+* Cache entries may be discarded at any time.
+* CSV imports and ledger transaction changes invalidate affected user projections.
+* Market price updates invalidate dashboard projections because valuations may change.
+* Cache invalidation is deterministic and does not modify financial records.
+
+---
+
 # Price Snapshot
 
 ## Purpose

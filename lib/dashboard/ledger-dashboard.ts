@@ -195,14 +195,18 @@ type NewsArticleRow = {
 };
 
 export async function getCurrentUserDashboardData() {
-  const [{ auth }, { prisma }] = await Promise.all([import("@/lib/auth"), import("@/lib/db")]);
+  const [{ auth }, { prisma }, { getDashboardProjection }] = await Promise.all([
+    import("@/lib/auth"),
+    import("@/lib/db"),
+    import("@/lib/dashboard/projections")
+  ]);
   const session = await auth();
 
   if (!session?.user?.id) {
     return createZeroDashboardData();
   }
 
-  return buildLedgerDashboardData({
+  return getDashboardProjection({
     userId: session.user.id,
     client: prisma as unknown as DashboardPrismaClient
   });

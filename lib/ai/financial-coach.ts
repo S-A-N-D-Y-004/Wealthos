@@ -5,6 +5,7 @@ import {
   type DashboardPrismaClient,
   type LedgerDashboardData
 } from "@/lib/dashboard/ledger-dashboard";
+import { invalidateDashboardProjection } from "@/lib/dashboard/projections";
 import { assertInsightSafety } from "@/lib/ai/insight-policy";
 import type { AIProvider, InsightPrompt } from "@/lib/ai/providers";
 import type { AlertItem, AssetClass, HoldingView, InsightItem } from "@/lib/domain/models";
@@ -421,6 +422,10 @@ export async function generateAndPersistPeriodicInsights({
     insights
   });
 
+  if (persistedCount > 0) {
+    invalidateDashboardProjection(userId, "ai-insight-update");
+  }
+
   return {
     generatedAt: asOf,
     provider: provider.name,
@@ -464,6 +469,10 @@ export async function generateAndPersistCoachResponse({
     client,
     insights: [insight]
   });
+
+  if (persistedCount > 0) {
+    invalidateDashboardProjection(userId, "ai-insight-update");
+  }
 
   return {
     generatedAt: asOf,

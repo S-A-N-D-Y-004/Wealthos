@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import {
+  clearDashboardProjectionCache,
+  getDashboardProjectionCacheStats
+} from "@/lib/dashboard/projections";
 import {
   refreshLatestMarketPrices,
   type MarketPriceProvider,
@@ -12,6 +16,10 @@ import { refreshMarketPricesJob } from "@/trigger/jobs/market-prices";
 const asOf = new Date("2026-06-16T00:00:00.000Z");
 
 describe("market price refresh service", () => {
+  beforeEach(() => {
+    clearDashboardProjectionCache();
+  });
+
   it("persists fetched price snapshots", async () => {
     const client = new FakePriceClient([stockAsset()]);
     const provider = quoteProvider({
@@ -40,6 +48,7 @@ describe("market price refresh service", () => {
       currency: "INR",
       isStale: false
     });
+    expect(getDashboardProjectionCacheStats().globalVersion).toBe(1);
   });
 
   it("uses fresh stored snapshots as cache and skips providers", async () => {
@@ -78,6 +87,7 @@ describe("market price refresh service", () => {
     expect(result.cached).toBe(1);
     expect(calls).toBe(0);
     expect(client.createManyCalls).toBe(0);
+    expect(getDashboardProjectionCacheStats().globalVersion).toBe(0);
   });
 
   it("uses stale prices gracefully when providers fail", async () => {

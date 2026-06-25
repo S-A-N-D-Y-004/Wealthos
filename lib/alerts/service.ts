@@ -2,6 +2,7 @@ import {
   buildLedgerDashboardData,
   type DashboardPrismaClient
 } from "@/lib/dashboard/ledger-dashboard";
+import { invalidateDashboardProjection } from "@/lib/dashboard/projections";
 import type { AlertItem, AssetClass } from "@/lib/domain/models";
 import { evaluateAlertRules } from "@/lib/alerts/rules";
 import type {
@@ -99,6 +100,10 @@ export async function evaluateAndPersistAlerts({
           data: generated.map(alertToCreateInput),
           skipDuplicates: true
         })).count;
+
+  if (persistedCount > 0) {
+    invalidateDashboardProjection(userId, "alert-update");
+  }
 
   return {
     evaluatedAt: asOf,
@@ -229,12 +234,18 @@ export async function markAlertsRead({
   alertIds?: string[];
   readAt?: Date;
 }) {
-  return client.alert.updateMany({
+  const result = await client.alert.updateMany({
     where: alertWhere(userId, alertIds),
     data: {
       readAt
     }
   });
+
+  if (result.count > 0) {
+    invalidateDashboardProjection(userId, "alert-update");
+  }
+
+  return result;
 }
 
 export async function markAlertsUnread({
@@ -246,12 +257,18 @@ export async function markAlertsUnread({
   client: AlertEnginePrismaClient;
   alertIds?: string[];
 }) {
-  return client.alert.updateMany({
+  const result = await client.alert.updateMany({
     where: alertWhere(userId, alertIds),
     data: {
       readAt: null
     }
   });
+
+  if (result.count > 0) {
+    invalidateDashboardProjection(userId, "alert-update");
+  }
+
+  return result;
 }
 
 export function zeroNotificationAggregation(): NotificationAggregation {

@@ -89,6 +89,43 @@ They must never become the primary source of truth.
 
 ---
 
+# Dashboard Projection Cache
+
+Dashboard reads use a runtime projection cache to avoid rebuilding the full portfolio from all ledger transactions on every request.
+
+Projection flow:
+
+```text
+Transactions
+      ->
+Holdings Derivation
+      ->
+Portfolio / Net Worth / Analytics
+      ->
+Dashboard Projection Cache
+      ->
+Dashboard API / UI
+```
+
+Rules:
+
+* The cache is read-through. A cache miss rebuilds the projection from ledger data.
+* Cached projections are not financial records.
+* Cached projections may be discarded and rebuilt at any time.
+* Transactions remain the single source of truth.
+* Holdings remain derived from transactions.
+* Price snapshots enrich valuation but never mutate historical transactions.
+
+Invalidation happens after dashboard-visible changes:
+
+* CSV imports and ledger transaction changes invalidate the affected user's projection.
+* Alert, AI insight, and news persistence invalidate the affected user's projection.
+* Market price refreshes invalidate all dashboard projections because prices can affect many users.
+
+After invalidation, the next dashboard read rebuilds the projection deterministically from transactions, latest prices, liabilities, goals, alerts, insights, and news.
+
+---
+
 # Portfolio Layer
 
 The portfolio aggregates all holdings across accounts.

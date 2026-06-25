@@ -1,3 +1,4 @@
+import { invalidateAllDashboardProjections } from "@/lib/dashboard/projections";
 import { MarketPriceCache, RateLimiter } from "@/lib/pricing/cache";
 import type {
   MarketPriceProvider,
@@ -67,7 +68,7 @@ export async function refreshLatestMarketPrices(options: PriceRefreshOptions) {
     );
   }
 
-  return {
+  const summary = {
     refreshedAt: asOf,
     results,
     fetched: results.filter((result) => result.status === "fetched").length,
@@ -76,6 +77,12 @@ export async function refreshLatestMarketPrices(options: PriceRefreshOptions) {
     failed: results.filter((result) => result.status === "failed").length,
     unsupported: results.filter((result) => result.status === "unsupported").length
   };
+
+  if (summary.fetched > 0) {
+    invalidateAllDashboardProjections("price-update");
+  }
+
+  return summary;
 }
 
 export async function getLatestPriceForAsset(
