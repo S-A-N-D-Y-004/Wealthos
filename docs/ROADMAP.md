@@ -2,7 +2,7 @@
 
 ## Current Version
 
-**Version 0.8.0**
+**Version 0.9.0**
 
 ### Completed Milestones
 
@@ -18,6 +18,7 @@
 * ✅ Alerts & Notifications Engine
 * ✅ AI Financial Coach
 * ✅ News & Sentiment Intelligence
+* ✅ Portfolio Return Calculations
 
 ---
 
@@ -196,6 +197,26 @@ Planned
 ---
 
 # Phase 4 — Portfolio Analytics
+
+In Progress
+
+## Portfolio Return Calculations
+
+Completed
+
+Features
+
+* Absolute return
+* Absolute return percentage
+* CAGR
+* Annualized return
+* Portfolio return summaries
+* Time range support
+* XIRR scaffold for Issue 10B
+
+---
+
+## Advanced Analytics
 
 Planned
 
