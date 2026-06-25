@@ -1,6 +1,6 @@
 {
   "name": "wealthos",
-  "version": "0.1.0",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "description": "Enterprise-grade personal wealth operating system.",
@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -18,37 +18,34 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@auth/prisma-adapter": "latest",
+    "@auth/prisma-adapter": "2.11.2",
     "@prisma/client": "6.16.3",
-    "@radix-ui/react-progress": "latest",
-    "@radix-ui/react-tabs": "latest",
-    "@radix-ui/react-tooltip": "latest",
-    "@trigger.dev/sdk": "latest",
-    "class-variance-authority": "latest",
-    "clsx": "latest",
-    "lucide-react": "latest",
-    "next": "15",
+    "clsx": "2.1.1",
+    "lucide-react": "1.17.0",
+    "next": "15.5.19",
     "next-auth": "5.0.0-beta.30",
-    "react": "latest",
-    "react-dom": "latest",
-    "recharts": "latest",
-    "tailwind-merge": "latest",
-    "zod": "latest"
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "recharts": "3.8.1",
+    "tailwind-merge": "3.6.0",
+    "zod": "3.25.76"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "latest",
-    "@testing-library/jest-dom": "latest",
-    "@testing-library/react": "latest",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "autoprefixer": "latest",
-    "eslint": "^9.39.1",
-    "eslint-config-next": "15",
-    "postcss": "latest",
+    "@eslint/eslintrc": "3.3.5",
+    "@tailwindcss/postcss": "4.3.0",
+    "@types/node": "25.9.2",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.1",
+    "eslint-config-next": "15.5.19",
+    "postcss": "8.5.15",
     "prisma": "6.16.3",
-    "tailwindcss": "latest",
-    "typescript": "^5.9.3",
-    "vitest": "^2.1.9"
+    "tailwindcss": "4.3.0",
+    "typescript": "5.9.3",
+    "vitest": "2.1.9"
+  },
+  "overrides": {
+    "@typescript-eslint/eslint-plugin": "8.50.0",
+    "@typescript-eslint/parser": "8.50.0"
   }
 }
