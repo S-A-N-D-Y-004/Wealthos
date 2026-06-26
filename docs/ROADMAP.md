@@ -21,6 +21,7 @@
 * ✅ Portfolio Return Calculations
 * ✅ XIRR & Money-Weighted Return
 * ✅ Portfolio Risk Analytics
+* ✅ Portfolio Analytics Dashboard
 
 ---
 
@@ -236,6 +237,24 @@ Completed
 * Diversification score
 * Concentration risk
 * Unified risk rating
+
+---
+
+## Portfolio Analytics Dashboard
+
+Completed
+
+Features
+
+* Dedicated `/analytics` route
+* Overview return cards
+* Risk summary cards
+* Portfolio growth charts
+* Net worth history charts
+* Monthly return charts
+* Asset, broker, and holding allocation views
+* Empty portfolio state
+* Responsive analytics layout
 
 ---
 

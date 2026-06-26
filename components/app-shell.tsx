@@ -22,6 +22,7 @@ const navItems: Array<{ href: Route; label: string; icon: LucideIcon }> = [
   { href: "/", label: "Command", icon: Gauge },
   { href: "/assets", label: "Assets", icon: PieChart },
   { href: "/net-worth", label: "Net Worth", icon: CircleDollarSign },
+  { href: "/analytics" as Route, label: "Analytics", icon: LineChart },
   { href: "/goals", label: "Goals", icon: Flag },
   { href: "/retirement", label: "Retirement", icon: LineChart },
   { href: "/imports", label: "Imports", icon: FileUp },
