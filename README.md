@@ -10,7 +10,7 @@ Unlike traditional portfolio trackers, WealthOS is built around an immutable fin
 
 # Current Version
 
-**Version 0.8.0**
+**Version v1.0.0-beta**
 
 ## Core Features
 
@@ -174,38 +174,53 @@ Current project quality:
 
 ---
 
-# Getting Started
+# Local Development
 
-## Install
+## 1. Install dependencies
 
 ```bash
 npm install
 ```
 
-## Configure Environment
+## 2. Create local environment
 
-Copy:
+Copy the example environment file:
 
-```text
-.env.example
+```bash
+cp .env.example .env.local
 ```
 
-to:
+On Windows PowerShell:
 
-```text
-.env
+```powershell
+Copy-Item .env.example .env.local
 ```
 
-Configure:
+Generate an Auth.js secret and place it inside `.env.local`:
 
-* DATABASE_URL
-* AUTH_SECRET
-* AI Provider Keys
-* Market Data API Keys (optional)
+```bash
+npx auth secret
+```
+
+At minimum, configure:
+
+* `DATABASE_URL`
+* `AUTH_SECRET`
+
+Optional providers can be left blank for local development:
+
+* Google OAuth: `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+* Email sign-in: `AUTH_EMAIL_SERVER`, `AUTH_EMAIL_FROM`
+* AI providers: `OPENAI_API_KEY`, `GEMINI_API_KEY`, `ANTHROPIC_API_KEY`
+* News provider: `NEWS_API_KEY`
+* Background jobs: `TRIGGER_SECRET_KEY`
+* Object storage: `R2_*`
+
+Current pricing providers do not require API keys. Yahoo Finance, CoinGecko, and AMFI use public endpoints; gold/manual prices can come from asset metadata.
 
 ---
 
-## Database
+## 3. Prepare the database
 
 Generate Prisma Client
 
@@ -221,10 +236,16 @@ npm run db:migrate
 
 ---
 
-## Start Development Server
+## 4. Start the development server
 
 ```bash
 npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:3000
 ```
 
 ---
